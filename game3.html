@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #333;
+            font-family: Arial, sans-serif;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-template-rows: repeat(4, 100px);
+            gap: 10px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            background: #888;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: #fff;
+            cursor: pointer;
+        }
+        .hidden {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-board" id="gameBoard"></div>
+
+    <script>
+        const cardsArray = [
+            'A', 'A', 'B', 'B', 'C', 'C', 'D', 'D',
+            'E', 'E', 'F', 'F', 'G', 'G', 'H', 'H'
+        ];
+        let firstCard = null;
+        let secondCard = null;
+        let lockBoard = false;
+        let matchedPairs = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function createBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            shuffle(cardsArray).forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card', 'hidden');
+                cardElement.dataset.value = card;
+                cardElement.addEventListener('click', flipCard);
+                gameBoard.appendChild(cardElement);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.remove('hidden');
+            this.textContent = this.dataset.value;
+
+            if (!firstCard) {
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            lockBoard = true;
+
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            const isMatch = firstCard.dataset.value === secondCard.dataset.value;
+
+            if (isMatch) {
+                matchedPairs++;
+                resetBoard();
+                if (matchedPairs === 1) {
+                    setTimeout(() => {
+                        alert('Congratulations! You achieved a small milestone!');
+                        window.location.href = 'game4.html';
+                    }, 500);
+                }
+                if (matchedPairs === cardsArray.length / 2) {
+                    setTimeout(() => {
+                        alert('Congratulations! You found all pairs!');
+                        window.location.reload();
+                    }, 500);
+                }
+            } else {
+                setTimeout(unflipCards, 1000);
+            }
+        }
+
+        function unflipCards() {
+            firstCard.classList.add('hidden');
+            firstCard.textContent = '';
+            secondCard.classList.add('hidden');
+            secondCard.textContent = '';
+            resetBoard();
+        }
+
+        function resetBoard() {
+            [firstCard, secondCard, lockBoard] = [null, null, false];
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
