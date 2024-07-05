@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avoid the Falling Blocks</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #333;
+            overflow: hidden;
+        }
+        canvas {
+            background: #fff;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+        const player = { width: 50, height: 50, x: 175, y: 550, speed: 5 };
+        const blocks = [];
+        const blockSpeed = 2;
+        let gameOver = false;
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowLeft' && player.x > 0) {
+                player.x -= player.speed;
+            } else if (event.key === 'ArrowRight' && player.x < canvas.width - player.width) {
+                player.x += player.speed;
+            }
+        });
+
+        function createBlock() {
+            const block = {
+                width: 50,
+                height: 50,
+                x: Math.random() * (canvas.width - 50),
+                y: 0
+            };
+            blocks.push(block);
+        }
+
+        function updateBlocks() {
+            for (let i = 0; i < blocks.length; i++) {
+                blocks[i].y += blockSpeed;
+                if (blocks[i].y > canvas.height) {
+                    blocks.splice(i, 1);
+                    i--;
+                }
+            }
+        }
+
+        function checkCollision() {
+            for (const block of blocks) {
+                if (player.x < block.x + block.width &&
+                    player.x + player.width > block.x &&
+                    player.y < block.y + block.height &&
+                    player.height + player.y > block.y) {
+                    gameOver = true;
+                }
+            }
+        }
+
+        function drawPlayer() {
+            context.fillStyle = 'blue';
+            context.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function drawBlocks() {
+            context.fillStyle = 'red';
+            for (const block of blocks) {
+                context.fillRect(block.x, block.y, block.width, block.height);
+            }
+        }
+
+        function gameLoop() {
+            if (gameOver) {
+                context.fillStyle = 'black';
+                context.font = '48px serif';
+                context.fillText('Game Over', 100, 300);
+                setTimeout(() => {
+                    window.location.href = 'game2.html';
+                }, 2000);
+                return;
+            }
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            drawBlocks();
+            checkCollision();
+            updateBlocks();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        setInterval(createBlock, 1000);
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
